@@ -1,13 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 
-set -e
-
-read -p "Enter the URL from email: " PRESIGNED_URL
-echo ""
-read -p "Enter the list of models to download without spaces (7B,13B,70B,7B-chat,13B-chat,70B-chat), or press Enter for all: " MODEL_SIZE
+# read -p "Enter the URL from email: " PRESIGNED_URL
+# echo ""
+# read -p "Enter the list of models to download without spaces (7B,13B,70B,7B-chat,13B-chat,70B-chat), or press Enter for all: " MODEL_SIZE
+PRESIGNED_URL='https://download.llamameta.net/*?Policy=eyJTdGF0ZW1lbnQiOlt7InVuaXF1ZV9oYXNoIjoia2FxZm53aW5oYnRydGw2cTFvampwb2MxIiwiUmVzb3VyY2UiOiJodHRwczpcL1wvZG93bmxvYWQubGxhbWFtZXRhLm5ldFwvKiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTY5NjE0Nzk5Mn19fV19&Signature=ai32vjWmAy6Anak6%7ELt5EqNmnfRbxdQAaA1TqirUC6Sz0tXIPxMu7EBMsOkNdP6hCbhIbk7rbyOhjx0xN5UKQ0EmSTczdVN2y6pwL2V60BsODEaDA6mtZGJ%7Eb2vIsDYhy0%7EG6qcrRDB1IdBniT0Ydg9QT-xteEpfWpuik2IuuVB8esnG-crgYgRpZSr0R9EYk8MwNs6jZritQAgnc%7EyuYwWZP%7E4MaO0HEcEws-UXRGV1ZnIlktPjjOH%7ECNE77fAkqTdEKYt9CYzOta3SRCyn0B0RW-WHh-vtvBMFvZINoJBeHs0AWpUWm9L9GhGgJnKoQp439vObq3dFbAPUXDQHtg__&Key-Pair-Id=K15QRJLYKIFSLZ&Download-Request-ID=1265555064844203'
+MODEL_SIZE='7B'
 TARGET_FOLDER="."             # where all files should end up
 mkdir -p ${TARGET_FOLDER}
 
@@ -16,18 +16,13 @@ if [[ $MODEL_SIZE == "" ]]; then
 fi
 
 echo "Downloading LICENSE and Acceptable Usage Policy"
-wget --continue ${PRESIGNED_URL/'*'/"LICENSE"} -O ${TARGET_FOLDER}"/LICENSE"
-wget --continue ${PRESIGNED_URL/'*'/"USE_POLICY.md"} -O ${TARGET_FOLDER}"/USE_POLICY.md"
+wget ${PRESIGNED_URL/'*'/"LICENSE"} -O ${TARGET_FOLDER}"/LICENSE"
+wget ${PRESIGNED_URL/'*'/"USE_POLICY.md"} -O ${TARGET_FOLDER}"/USE_POLICY.md"
 
 echo "Downloading tokenizer"
-wget --continue ${PRESIGNED_URL/'*'/"tokenizer.model"} -O ${TARGET_FOLDER}"/tokenizer.model"
-wget --continue ${PRESIGNED_URL/'*'/"tokenizer_checklist.chk"} -O ${TARGET_FOLDER}"/tokenizer_checklist.chk"
-CPU_ARCH=$(uname -m)
-  if [ "$CPU_ARCH" = "arm64" ]; then
-    (cd ${TARGET_FOLDER} && md5 tokenizer_checklist.chk)
-  else
-    (cd ${TARGET_FOLDER} && md5sum -c tokenizer_checklist.chk)
-  fi
+wget ${PRESIGNED_URL/'*'/"tokenizer.model"} -O ${TARGET_FOLDER}"/tokenizer.model"
+wget ${PRESIGNED_URL/'*'/"tokenizer_checklist.chk"} -O ${TARGET_FOLDER}"/tokenizer_checklist.chk"
+(cd ${TARGET_FOLDER} && md5sum -c tokenizer_checklist.chk)
 
 for m in ${MODEL_SIZE//,/ }
 do
@@ -56,15 +51,12 @@ do
 
     for s in $(seq -f "0%g" 0 ${SHARD})
     do
-        wget --continue ${PRESIGNED_URL/'*'/"${MODEL_PATH}/consolidated.${s}.pth"} -O ${TARGET_FOLDER}"/${MODEL_PATH}/consolidated.${s}.pth"
+        wget ${PRESIGNED_URL/'*'/"${MODEL_PATH}/consolidated.${s}.pth"} -O ${TARGET_FOLDER}"/${MODEL_PATH}/consolidated.${s}.pth"
     done
 
-    wget --continue ${PRESIGNED_URL/'*'/"${MODEL_PATH}/params.json"} -O ${TARGET_FOLDER}"/${MODEL_PATH}/params.json"
-    wget --continue ${PRESIGNED_URL/'*'/"${MODEL_PATH}/checklist.chk"} -O ${TARGET_FOLDER}"/${MODEL_PATH}/checklist.chk"
+    wget ${PRESIGNED_URL/'*'/"${MODEL_PATH}/params.json"} -O ${TARGET_FOLDER}"/${MODEL_PATH}/params.json"
+    wget ${PRESIGNED_URL/'*'/"${MODEL_PATH}/checklist.chk"} -O ${TARGET_FOLDER}"/${MODEL_PATH}/checklist.chk"
     echo "Checking checksums"
-    if [ "$CPU_ARCH" = "arm64" ]; then
-      (cd ${TARGET_FOLDER}"/${MODEL_PATH}" && md5 checklist.chk)
-    else
-      (cd ${TARGET_FOLDER}"/${MODEL_PATH}" && md5sum -c checklist.chk)
-    fi
+    (cd ${TARGET_FOLDER}"/${MODEL_PATH}" && md5sum -c checklist.chk)
 done
+
