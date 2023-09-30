@@ -1,9 +1,17 @@
+"""
+Author:ramch
+This script perform custom named entity recognition using few shots learning
+converts a train csv in to prompts
+populates the test csv with results
+"""
+# TODO: Use the NER train data and populate the NER test data
+
 from typing import Optional
 from llama import Llama
 
 
 generator = Llama.build(
-        ckpt_dir='models/llama-2-7b',
+        ckpt_dir='models/llama-2-7b-chat',
         tokenizer_path='models/tokenizer.model',
         max_seq_len=512,
         max_batch_size=8,
